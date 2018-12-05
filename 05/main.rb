@@ -38,7 +38,7 @@ end
 input_file = ARGV.fetch(0)
 polymer = File.read(input_file).strip
 
-puts reduce_polymer(polymer.clone)
+puts reduce_polymer(polymer)
 
 letters = Set.new(polymer.downcase.chars)
 lengths = letters.map do |letter|
