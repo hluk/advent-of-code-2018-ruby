@@ -1,13 +1,12 @@
 #!/usr/bin/env ruby
 MAX_DISTANCE = 10000
-INDEX = (('a'..'z').to_a + ('A'..'Z').to_a).freeze
 
 def shortest_distance_to(x, y, coords)
   distances = coords.map { |x1, y1| (x1 - x).abs + (y1 - y).abs }
   min1, min2 = distances.each_with_index.min_by(2) { |d, _| d }
-  return '.' if min1[0] == min2[0]
+  return -1 if min1[0] == min2[0]
 
-  INDEX[min1[1]]
+  min1[1]
 end
 
 coords = ARGF.readlines.map { |line| line.split(', ').map(&:to_i) }
@@ -21,32 +20,19 @@ map_y = max_y - min_y + 1
 # crop area
 coords.map! { |x, y| [x - min_x, y - min_y] }
 
-map = Array.new(map_y) { Array.new(map_x) }
-
+counters = Array.new(coords.length, 0)
 (0...map_y).each do |y|
   (0...map_x).each do |x|
-    map[y][x] = shortest_distance_to(x, y, coords)
+    index = shortest_distance_to(x, y, coords)
+    if x.between?(1, map_x - 2) && y.between?(1, map_y - 2) && counters[index] != -1
+      counters[index] += 1
+    else
+      counters[index] = -1
+    end
   end
 end
 
-# puts(map.map { |row| row.join('') }.join("\n"))
-
-counters = Hash.new(0)
-map.each do |row|
-  row.each do |index|
-    counters[index] += 1
-  end
-end
-
-# drop infinite areas
-map.first.each { |index| counters.delete(index) }
-map.last.each { |index| counters.delete(index) }
-map.each do |row|
-  counters.delete(row.first)
-  counters.delete(row.last)
-end
-
-puts(counters.max_by { |_, v| v })
+puts counters.max
 
 area = 0
 (0...map_y).each do |y|
