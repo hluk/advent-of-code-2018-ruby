@@ -48,16 +48,28 @@ class Pots
   end
 
   def next_generations(count)
+    cache = []
+    cache_indexes = Hash.new
+
     count.times do |generation|
+      if cache_indexes[@pots]
+        first_index = cache_indexes[@pots]
+        loop_ = cache[first_index..-1]
+        generations_to_go = count - generation
+        loop_count, rest = generations_to_go.divmod(loop_.length)
+        index_diff1 = loop_[0...rest].sum { |_, index_diff| index_diff }
+        index_diff2 = loop_[rest..-1].sum { |_, index_diff| index_diff }
+        @first_pot_index += (index_diff1 + index_diff2) * loop_count + index_diff1 * rest
+        break
+      end
+
       old_pots = @pots.clone
       old_first_pot_index = @first_pot_index
 
       next_generation
 
-      if old_pots == @pots
-        @first_pot_index += (@first_pot_index - old_first_pot_index) * (count - generation - 1)
-        break
-      end
+      cache_indexes[old_pots] = cache.length
+      cache.append([@pots, @first_pot_index - old_first_pot_index])
     end
 
     @pots
@@ -99,4 +111,4 @@ puts pots.sum
 
 pots = Pots.new(File.readlines('input'))
 pots.next_generations(50000000000)
-puts pots.sum == 4400000000304
+puts pots.sum
