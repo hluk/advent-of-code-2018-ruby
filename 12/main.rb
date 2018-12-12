@@ -7,20 +7,10 @@ class Pots
   attr_reader :pots
 
   def initialize(input)
-    @pots = ''
-    @mutations = Hash.new
+    @pots = input[0].chomp['initial state: '.length..-1]
 
-    initial_state_prefix = 'initial state: '.freeze
-    input.each do |line|
-      line.chomp!
-      next if line.empty?
-
-      if line.start_with?(initial_state_prefix)
-        @pots = line[initial_state_prefix.length..-1]
-      else
-        @mutations[line[0..4]] = line[-1]
-      end
-    end
+    @mutations = {}
+    input.each { |line| @mutations[line[0..4]] = line.chomp[-1] }
 
     @first_pot_index = 0
   end
@@ -28,16 +18,12 @@ class Pots
   def next_generation
     @pots.prepend('....')
     @first_pot_index += 4
-    @pots += '....' if @pots[-4..-1] != '....'
+    @pots += '....'
 
-    new_pots = '.' * @pots.length
-    (0...@pots.length - 5).each do |i|
-      current_pots = @pots[i...i + 5]
-      mutate = @mutations[current_pots]
-      new_pots[i + 2] = mutate if mutate
-    end
-
-    @pots = new_pots
+    @pots = @pots.each_char.each_cons(5).map do |pots|
+      @mutations[pots.join] || '.'
+    end.join('')
+    @first_pot_index -= 2
 
     prefix = @pots.each_char.take_while { |x| x == '.' }.count
     @pots[0...prefix] = ''
