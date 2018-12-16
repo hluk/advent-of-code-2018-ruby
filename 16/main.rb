@@ -120,17 +120,6 @@ class Instructions
   end
 end
 
-def find_op_mapping(op_codes, used_op_codes = Set.new, op_code = 0)
-  return used_op_codes.to_a unless op_codes.include?(op_code)
-
-  (op_codes[op_code] - used_op_codes).each do |possible_op_code|
-    result = find_op_mapping(op_codes, used_op_codes + [possible_op_code], op_code + 1)
-    return result if result
-  end
-
-  nil
-end
-
 input = ARGF.readlines
 
 op_codes = Hash.new { |h, k| h[k] = Set.new }
@@ -144,8 +133,16 @@ part1 = insts.instructions.count do |inst|
 end
 puts part1
 
-mapping = find_op_mapping(op_codes)
-raise unless mapping
+# This assumes there is only one solution.
+mapping = {}
+until op_codes.empty?
+  op_code, names = op_codes.find { |_, v| v.length == 1 }
+  raise unless op_code
+
+  op_codes.delete(op_code)
+  op_codes.each { |_, v| v.delete(names.first) }
+  mapping[op_code] = names.first
+end
 raise unless Set.new(mapping).length == 16
 raise unless insts.instructions.all? do |inst|
   inst.matches(mapping[inst.instruction[0]])
