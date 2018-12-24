@@ -4,8 +4,6 @@ require 'rspec/core'
 require 'rspec/expectations'
 
 class Nanobot
-  include Comparable
-
   attr_accessor :pos
   attr_accessor :r
 
@@ -31,32 +29,6 @@ class Nanobot
 
   def to_s
     inspect
-  end
-end
-
-class Intersection
-  attr_accessor :bots
-
-  include Comparable
-
-  def initialize(bot)
-    @bots = Set.new([bot])
-  end
-
-  def add(bot)
-    @bots.add(bot) if @bots.all? { |bot1| bot != bot1 && Nanobots.intersects?(bot, bot1) }
-  end
-
-  def hash
-    @bots.hash
-  end
-
-  def inspect
-    "#<Intersection #{@bots.map(&:inspect).join(', ')}>"
-  end
-
-  def eql?(other)
-    @bots.eql?(other.bots)
   end
 end
 
